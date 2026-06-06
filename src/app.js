@@ -1,13 +1,14 @@
 import express from "express";
 import morgan from "morgan";
 import authRouter from "./routes/auth.routes.js";
-
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 
 app.use(express.json()); //middleware
 app.use(morgan("dev")); //logger -- which request,what endpoint did it hit,response time etc..
+app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 

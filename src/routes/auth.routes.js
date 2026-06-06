@@ -6,9 +6,11 @@ authRouter.post("/register",authController.register) // POST --- /api/auth/regis
 
 
 
-/**GET api/auth/get-me */
+/**GET /api/auth/get-me */
 authRouter.get("/get-me", authController.getMe)
-
-
-
+/**Get /api/auth/refresh-token
+ * Endpoint for refresh token */
+authRouter.get("/refresh-token", authController.refreshToken)
+/** LOGOUT */
+authRouter.get("/logout", authController.logout)
 export default authRouter;
