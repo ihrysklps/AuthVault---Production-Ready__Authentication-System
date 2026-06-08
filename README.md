@@ -150,24 +150,7 @@ npm start
 * JWT-based authorization
 * Environment-based secret management
 
-## Future Improvements
-
-* Forgot Password Flow
-* Password Reset via Email
-* Rate Limiting
-* Google OAuth Authentication
-* Role-Based Access Control (RBAC)
-* Two-Factor Authentication (2FA)
-
-## Contributing
-
-Contributions are welcome. Feel free to fork the repository and submit pull requests.
-
-## License
-
-This project is licensed under the MIT License.
+---------------------------------------
 Copyright (c) 2026 Hrydyansh Shukla
 
----
-
-If you found this project useful, consider giving it a ⭐ on GitHub.
+If you found this project useful, consider giving it a star on GitHub.
