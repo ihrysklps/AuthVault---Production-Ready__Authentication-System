@@ -1,16 +1,19 @@
 import { Router } from "express";
 import * as authController from "../controllers/auth.controller.js";
 const authRouter = Router();
-
-authRouter.post("/register",authController.register) // POST --- /api/auth/register
-
-
+/** Registering a user 
+ * POST /api/auth/register */
+authRouter.post("/register",authController.register) 
+/** POST /api/auth/login */
+authRouter.post("/login",authController.login)
 
 /**GET /api/auth/get-me */
 authRouter.get("/get-me", authController.getMe)
-/**Get /api/auth/refresh-token
+/**GET /api/auth/refresh-token
  * Endpoint for refresh token */
 authRouter.get("/refresh-token", authController.refreshToken)
 /** LOGOUT */
 authRouter.get("/logout", authController.logout)
+/** Simultaneusly Logout from all devices */
+authRouter.get("/logout-all", authController.logoutAll)
 export default authRouter;
