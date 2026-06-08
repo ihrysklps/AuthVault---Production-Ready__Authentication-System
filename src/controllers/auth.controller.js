@@ -3,7 +3,9 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import sessionModel from "../models/session.model.js";
-
+import {sendEmail} from "../services/email.services.js";
+import { generateOTP, getOTPHtml } from "../utils/utils.js";
+import otpModel from "../models/otp.model.js";
 
 export async function register(req, res) {
     const { username, email, password } = req.body;
@@ -26,44 +28,22 @@ export async function register(req, res) {
         email,
         password: hashedPassword
     })
-    //TOKENs CREATED Refresh and Access Tokens
-    const refreshToken = jwt.sign({
-        id: user._id
-    }, config.JWT_SECRET,
-        {
-            expiresIn: "7d"
-        }
-    )
-    //Session created everytime a refreshtoken is created
-    const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
-    const session = await sessionModel.create({
+    const otp = generateOTP();
+    const html = getOTPHtml(otp);
+    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    await otpModel.create({
+        eamil,
         user: user._id,
-        refreshTokenHash,
-        ip: req.ip,
-        userAgent: req.headers["user-agent"]
+        otphash
     })
-    const accessToken = jwt.sign({
-        id: user._id,
-        sessionId: session._id
-    }, config.JWT_SECRET,
-        {
-            expiresIn: "15m"
-        }
-    )
-
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true, //Javasript being run on client side will never be able to read cookies
-        secure: true,
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000 //7days
-    })
+    await sendEmail(email, "OTP Verification", `Your OTP code is${otp}`, html)
     res.status(201).json({
         message: "user is registered successfully",
         user: {
             username: user.username,
             email: user.email,
-        },
-        accessToken
+            verified : user.verified
+        }
     })
 
 }
@@ -74,6 +54,12 @@ export async function login(req,res){
     if(!user){
         res.status(401).json({
             message: "Invalid credentials"
+        })
+    }
+    /** We refrain from generating access and refresh tokens until and unless a user is verified */
+    if(!user.verified){
+        return res.status(401).json({
+            message: "User's Email not verified"
         })
     }
     const hashedPassword = crypto.createHash("sha256").update("password").digest("hex");
@@ -239,5 +225,33 @@ export async function logoutAll(req, res) {
     res.clearCookie("refreshToken")
     res.status(200).json({
         message: "logged out from all devices successfully"
+    })
+}
+
+export async function verifyEmail(req,res){
+    const{ otp,email} = req.body
+    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const otpDoc = await otpModel.findOne({
+        email,
+        otpHash
+    })
+    if(!otpHash){
+        return res.status(401).json({
+            message: "Invalid OTP"
+        })
+    }
+    const user = await userModel.findByIdAndUpdate(otpDoc.user,{
+        verified:true
+    })
+    await otpModel.deleteMany({
+        user:otpDoc.user
+    })
+    return res.status(200).json({
+        message: "Email verified successfully",
+        user:{
+            username : user.username,
+            email: user.email,
+            verified : user.verified
+        }
     })
 }

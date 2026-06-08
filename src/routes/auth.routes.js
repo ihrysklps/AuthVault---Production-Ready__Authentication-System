@@ -16,4 +16,6 @@ authRouter.get("/refresh-token", authController.refreshToken)
 authRouter.get("/logout", authController.logout)
 /** Simultaneusly Logout from all devices */
 authRouter.get("/logout-all", authController.logoutAll)
+/** GET /api/auth/email-verify */
+authRouter.get("/email-verify",authController.verifyEmail)
 export default authRouter;
